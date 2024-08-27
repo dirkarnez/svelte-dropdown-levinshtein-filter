@@ -1,16 +1,34 @@
 <script>
+ 	import { distance } from "fastest-levenshtein";
+
 	let menuOpen = false;
 	let inputValue = "";
 	$:console.log(inputValue)
 	
 	const menuItems = ["About", "Base", "Blog", "Contact", "Custom", "Support", "Tools", "Boats", "Cars", "Bikes", "Sheds", "Billygoats", "Zebras", "Tennis Shoes", "New Zealand"];
 	let filteredItems = [];
-	// 
+  
+	const levenshtein_ratio = (s, t) => 1 - distance(s, t) / Math.max(s.length, t.length);
+
 	const handleInput = () => {
-		return filteredItems = !!inputValue ? 
-			menuItems.filter(item => item.toLowerCase().match(inputValue.toLowerCase()))
-			:
-			[];	
+	    const input = inputValue.toLowerCase();
+	    filteredItems = menuItems.map(item => {
+	      const content = item.toLowerCase();
+	      const ratio = levenshtein_ratio(input, content);
+	      return {
+		content: content, 
+		ratio: ratio
+	      }
+	    })
+	    .filter(item => item.ratio >= 0.2)
+	    .sort((a, b) => b.ratio - a.ratio)
+	    .map(item => {
+	      /* 
+	      debugging
+	      return `${item.content}, ${item.ratio}`
+	      */
+	      return item.content;
+	    });
 	}
 </script>
 
